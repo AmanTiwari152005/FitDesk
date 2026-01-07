@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Renewal History</title>
+
+<style>
+    * {
+        box-sizing: border-box;
+        font-family: "Segoe UI", Arial, sans-serif;
+    }
+
+    body {
+        margin: 0;
+        padding: 40px;
+        /* Matches your previous pages' deep radial background */
+        background: radial-gradient(circle at top left, #1a1a1a, #000000);
+        color: #ffffff;
+        min-height: 100vh;
+    }
+
+    .container {
+        max-width: 1100px;
+        margin: auto;
+    }
+
+    h2 {
+        margin-bottom: 10px;
+        /* Orange to Yellow Gradient text */
+        background: linear-gradient(to right, #ff8c00, #ffdb05);
+        background-clip: text;
+        -webkit-background-clip: text;
+        color: transparent;
+        -webkit-text-fill-color: transparent;
+        font-weight: 800;
+    }
+
+    /* INFO PANEL */
+    .info {
+        background: #121212;
+        padding: 20px;
+        border-radius: 14px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+        margin-bottom: 30px;
+        color: #bbb;
+        border: 1px solid #333;
+        border-left: 5px solid #ff8c00; /* Theme accent strip */
+    }
+
+    .info ul {
+        margin-top: 10px;
+        padding-left: 20px;
+    }
+
+    .info li {
+        margin-bottom: 8px;
+    }
+
+    .info strong {
+        color: #ffdb05; /* Yellow accent for emphasis */
+    }
+
+    /* DATA TABLE */
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        background: #121212;
+        border-radius: 14px;
+        overflow: hidden;
+        box-shadow: 0 12px 30px rgba(0,0,0,0.5);
+        border: 1px solid #333;
+    }
+
+    th, td {
+        padding: 16px;
+        text-align: left;
+        font-size: 14px;
+    }
+
+    th {
+        /* Dark header with yellow-gold text */
+        background: #1a1a1a;
+        color: #ffdb05;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        border-bottom: 2px solid #333;
+    }
+
+    tr:hover td {
+        background: #181818; /* Subtle row highlight */
+    }
+
+    tr:not(:last-child) td {
+        border-bottom: 1px solid #222;
+    }
+
+    /* PACKAGE BADGE */
+    .pkg {
+        background: rgba(255, 140, 0, 0.15);
+        color: #ffdb05;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: bold;
+        display: inline-block;
+        border: 1px solid rgba(255, 140, 0, 0.3);
+    }
+
+    /* EMPTY STATE */
+    .empty {
+        text-align: center;
+        padding: 50px;
+        color: #666;
+        background: #121212;
+        border-radius: 14px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+        border: 1px dashed #333;
+    }
+
+    /* BUTTONS */
+    button {
+        margin-bottom: 20px;
+        padding: 12px 20px;
+        border-radius: 10px;
+        border: none;
+        /* Matches your primary action buttons */
+        background: linear-gradient(45deg, #ff8c00, #ffdb05);
+        color: #000;
+        font-weight: 700;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+    button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(255, 140, 0, 0.4);
+        filter: brightness(1.1);
+    }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+    <button onclick="history.back()">⬅ Back</button>
+
+    <h2 id="memberName">Renewal History</h2>
+
+
+    <!-- TABLE -->
+    <div id="tableBox"></div>
+
+</div>
+
+<script>
+const memberId = new URLSearchParams(window.location.search).get("id");
+
+fetch(`/api/members/renewal-history/${memberId}/`, {
+    headers: {
+        "Authorization": "Token " + localStorage.getItem("token")
+    }
+})
+.then(res => res.json())
+.then(data => {
+    document.getElementById("memberName").innerText =
+        "Renewal History – " + data.member_name;
+
+    const box = document.getElementById("tableBox");
+
+    if (!data.history || data.history.length === 0) {
+        box.innerHTML = `
+            <div class="empty">
+                No renewal records found for this member yet.
+            </div>
+        `;
+        return;
+    }
+
+    let rows = "";
+    data.history.forEach(r => {
+        rows += `
+            <tr>
+                <td><span class="pkg">${r.package}</span></td>
+                <td>${r.start_date}</td>
+                <td>${r.end_date}</td>
+                <td>₹${r.amount}</td>
+                <td>${new Date(r.renewed_on).toLocaleDateString()}</td>
+            </tr>
+        `;
+    });
+
+    box.innerHTML = `
+        <table>
+            <thead>
+                <tr>
+                    <th>Package</th>
+                    <th>Start Date</th>
+                    <th>End Date</th>
+                    <th>Amount</th>
+                    <th>Renewed On</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${rows}
+            </tbody>
+        </table>
+    `;
+});
+</script>
+
+</body>
+</html>

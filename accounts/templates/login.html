@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login | FitDesk</title>
+
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/auth.css' %}">
+
+    <style>
+        .google-btn {
+            width: 100%;
+            padding: 12px;
+            border-radius: 10px;
+            border: 1px solid #ddd;
+            background: #fff;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 15px;
+            margin-top: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: 0.3s;
+        }
+
+        .google-btn:hover {
+            background: #f8f8f8;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .image-section img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="card">
+        <h1>FitDesk</h1>
+        <p class="subtitle">Where Strength Meets Management</p>
+
+        <h3>Login</h3>
+
+        <input type="text" id="login-username" placeholder="Username">
+        <input type="password" id="login-password" placeholder="Password">
+
+        <button onclick="login()">Login</button>
+        <p class="link">
+           <a href="/api/accounts/forgot-password-page/">Forgot Password?</a>
+        </p>
+
+
+    
+        <p class="link">
+            Don’t have an account?
+            <a href="/api/accounts/register-page/">Register</a>
+        </p>
+    </div>
+
+    <div class="image-section">
+        <img src="{% static 'images/Gemini_Generated_Image_lef841lef841lef8.png' %}" alt="Gym">
+    </div>
+</div>
+
+<script src="{% static 'js/auth.js' %}"></script>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { 
+        getAuth, 
+        GoogleAuthProvider, 
+        signInWithRedirect, 
+        getRedirectResult 
+    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+    document.addEventListener("DOMContentLoaded", async () => {
+        /* 🔥 FIREBASE CONFIG */
+       
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const provider = new GoogleAuthProvider();
+
+        const googleBtn = document.getElementById("googleBtn");
+
+        /* 🔐 START GOOGLE LOGIN */
+        googleBtn.addEventListener("click", () => {
+            signInWithRedirect(auth, provider);
+        });
+
+        /* 🔁 HANDLE REDIRECT RESULT */
+        try {
+            const result = await getRedirectResult(auth);
+
+            if (!result || !result.user) return;
+
+            const token = await result.user.getIdToken();
+
+            const res = await fetch("/api/accounts/firebase-login/", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ token })
+            });
+
+            const data = await res.json();
+            localStorage.setItem("token", data.token);
+
+            // 🔥 REDIRECT BASED ON USER TYPE
+            const checkRes = await fetch("/api/gym/check/", {
+                headers: {
+                    "Authorization": "Token " + data.token
+                }
+            });
+            const resultCheck = await checkRes.json();
+
+            if (resultCheck.gym_exists) {
+                window.location.href = "/dashboard/";
+            } else {
+                window.location.href = "/api/gym/setup/";
+            }
+        } catch (error) {
+            console.error("Firebase Redirect Error:", error);
+        }
+    }); // <-- Added missing closing parenthesis and brace
+</script>
+
+</body>
+</html>

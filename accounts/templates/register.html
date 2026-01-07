@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Register</title>
+
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/auth.css' %}">
+
+    <style>
+        .info-text {
+            margin-top: 10px;
+            font-size: 13px;
+            color: #555;
+            text-align: center;
+        }
+
+        .error {
+            color: red;
+            font-size: 13px;
+            margin-top: 8px;
+            text-align: center;
+        }
+
+        .success {
+            color: green;
+            font-size: 13px;
+            margin-top: 8px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="card">
+        <h1><span></span>FitDesk</h1>
+        <p class="subtitle">Where Strength Meets Management</p>
+
+        <h3>Create Account</h3>
+
+        <!-- INPUTS -->
+        <input type="text" id="reg-username" placeholder="Username">
+        <input type="email" id="reg-email" placeholder="Email">
+        <input type="password" id="reg-password" placeholder="Password">
+
+        <!-- REGISTER BUTTON -->
+        <button onclick="register()">Register</button>
+
+        <!-- INFO -->
+        <div class="info-text">
+            📩 A verification code will be sent to your email
+        </div>
+
+        <!-- MESSAGE AREA -->
+        <div id="message"></div>
+
+        <!-- LOGIN LINK -->
+        <p class="link">
+            Already have an account?
+            <a href="/api/accounts/login-page/">Login</a>
+        </p>
+    </div>
+
+    <!-- IMAGE SECTION -->
+    <div class="image-section">
+       <img src="{% static 'images/Gemini_Generated_Image_lef841lef841lef8.png' %}" alt="Gym">
+    </div>
+</div>
+
+<!-- AUTH JS -->
+<script src="{% static 'js/auth.js' %}"></script>
+
+<script>
+/*
+  This script ONLY handles UI feedback.
+  Actual register() logic is in auth.js
+*/
+
+function showMessage(text, type="success") {
+    const msg = document.getElementById("message");
+    msg.className = type;
+    msg.innerText = text;
+}
+</script>
+
+</body>
+</html>

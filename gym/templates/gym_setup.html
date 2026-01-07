@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Gym Setup</title>
+<style>
+    body {
+        font-family: 'Segoe UI', Arial, sans-serif;
+        background: radial-gradient(circle at center, #1a1a1a 0%, #000000 100%);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        margin: 0;
+        padding: 40px;
+        /* CHANGE 1: Forced global text color to white */
+        color: #ffffff; 
+    }
+
+    .box {
+        max-width: 420px;
+        width: 100%;
+        background: rgba(20, 20, 20, 0.95);
+        padding: 35px;
+        margin: auto;
+        border-radius: 20px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6), 0 0 20px rgba(255, 140, 0, 0.1);
+        border: 1px solid #333;
+        border-top: 4px solid #ff8c00;
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* CHANGE 2: Added explicit white color to all common text tags */
+    h1, h2, h3, h4, h5, h6, p, span, label, li, td, th {
+        color: #ffffff;
+    }
+
+    /* KEEPING: The gradient for headings as it's part of your theme */
+    .gradient-text {
+        background: linear-gradient(to right, #ff8c00, #ffdb05);
+        background-clip: text;
+        -webkit-background-clip: text;
+        color: transparent;
+        -webkit-text-fill-color: transparent;
+    }
+
+    input {
+        width: 100%;
+        padding: 14px;
+        margin-bottom: 18px;
+        background: #252525;
+        border: 1px solid #444;
+        border-radius: 10px;
+        /* CHANGE 3: Ensured text typed into boxes is white */
+        color: #ffffff; 
+        font-size: 15px;
+        outline: none;
+        transition: all 0.3s ease;
+    }
+
+    input:focus {
+        border-color: #ff8c00;
+        background: #2a2a2a;
+        box-shadow: 0 0 8px rgba(255, 140, 0, 0.2);
+    }
+
+    button {
+        width: 100%;
+        padding: 14px;
+        margin-top: 10px;
+        background: linear-gradient(45deg, #ff8c00, #ffdb05);
+        /* NOTE: Kept button text BLACK (#000) because white text 
+           on a yellow/orange button is very hard to read */
+        color: #000; 
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        font-weight: 700;
+        font-size: 16px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    button:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 20px rgba(255, 140, 0, 0.4);
+        filter: brightness(1.1);
+    }
+</style>
+</head>
+<body>
+
+<div class="box">
+    <h2>Gym Setup</h2>
+
+    <input id="gym_name" placeholder="Gym Name">
+    <input id="address" placeholder="Address">
+
+    <label>Opening Time</label>
+    <input type="time" id="opening_time">
+
+    <label>Closing Time</label>
+    <input type="time" id="closing_time">
+
+    <label>Monthly Fee</label>
+    <input type="number" id="monthly_fee">
+
+    <label>Quarterly Fee</label>
+    <input type="number" id="quarterly_fee">
+
+    <label>Yearly Fee</label>
+    <input type="number" id="yearly_fee">
+
+    <!-- IMPORTANT: type="button" -->
+    <button type="button" id="setupBtn">
+        Complete Setup
+    </button>
+</div>
+
+<script>
+/* 🔍 DEBUG CHECK */
+console.log("Gym setup JS loaded");
+
+/* 🔐 TOKEN CHECK */
+const token = localStorage.getItem("token");
+if (!token) {
+    alert("Login required");
+    window.location.href = "/api/accounts/login-page/";
+}
+
+/* 🔥 BUTTON HANDLER */
+document.getElementById("setupBtn").addEventListener("click", () => {
+    console.log("Setup button clicked");
+
+    fetch("/api/gym/setup/create/", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Token " + token
+        },
+        body: JSON.stringify({
+            gym_name: document.getElementById("gym_name").value,
+            address: document.getElementById("address").value,
+            opening_time: document.getElementById("opening_time").value,
+            closing_time: document.getElementById("closing_time").value,
+            monthly_fee: document.getElementById("monthly_fee").value,
+            quarterly_fee: document.getElementById("quarterly_fee").value,
+            yearly_fee: document.getElementById("yearly_fee").value
+        })
+    })
+    .then(res => {
+        console.log("Response status:", res.status);
+        return res.json();
+    })
+    .then(data => {
+        console.log("Response data:", data);
+
+        if (data.success) {
+            window.location.href = "/dashboard/";
+        } else {
+            alert(data.message || "Setup failed");
+        }
+    })
+    .catch(err => {
+        console.error("Setup error:", err);
+        alert("Something went wrong");
+    });
+});
+</script>
+
+</body>
+</html>

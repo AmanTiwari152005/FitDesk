@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Gym Profile</title>
+
+<style>
+    * {
+        font-family: "Segoe UI", Arial, sans-serif;
+        box-sizing: border-box;
+    }
+
+    body {
+        margin: 0;
+        min-height: 100vh;
+        /* Dark industrial background */
+        background: radial-gradient(circle at center, #1a1a1a 0%, #000000 100%);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 30px;
+    }
+
+    .profile-box {
+        width: 100%;
+        max-width: 520px;
+        /* Deep charcoal container */
+        background: #121212;
+        padding: 30px;
+        border-radius: 20px;
+        /* Subtle orange glow shadow */
+        box-shadow: 0 20px 50px rgba(255, 140, 0, 0.15);
+        border: 1px solid #333;
+    }
+
+    h2 {
+        text-align: center;
+        margin-bottom: 25px;
+        /* Gradient text effect */
+        background: linear-gradient(to right, #ff8c00, #ffdb05);
+        background-clip: text;
+        -webkit-background-clip: text;
+        color: transparent;
+        -webkit-text-fill-color: transparent;
+    }
+
+    label {
+        display: block;
+        margin-top: 14px;
+        font-size: 14px;
+        font-weight: 600;
+        color: #ffdb05; /* Yellow accent for labels */
+    }
+
+    input {
+        width: 100%;
+        padding: 12px 14px;
+        margin-top: 6px;
+        border-radius: 12px;
+        /* Dark inputs to match theme */
+        background: #1e1e1e;
+        border: 1px solid #333;
+        color: #fff;
+        font-size: 14px;
+        transition: all 0.3s ease;
+    }
+
+    input:focus {
+        outline: none;
+        border-color: #ff8c00;
+        /* Glow effect on focus */
+        box-shadow: 0 0 0 3px rgba(255, 140, 0, 0.2);
+    }
+
+    input[disabled] {
+        background: #0a0a0a;
+        color: #555;
+        border-color: #222;
+        cursor: not-allowed;
+    }
+
+    .btn {
+        width: 100%;
+        margin-top: 22px;
+        padding: 14px;
+        border-radius: 14px;
+        border: none;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .save {
+        /* Vibrant Gradient Button */
+        background: linear-gradient(45deg, #ff8c00, #ffdb05);
+        color: #000;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .save:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(255, 140, 0, 0.4);
+    }
+
+    .back {
+        background: transparent;
+        border: 1px solid #444;
+        color: #888;
+        margin-top: 12px;
+    }
+
+    .back:hover {
+        background: #1a1a1a;
+        color: #fff;
+        border-color: #ffdb05;
+    }
+</style>
+</head>
+
+<body>
+
+<div class="profile-box">
+    <h2>Gym Profile</h2>
+
+    <label>Gym Name</label>
+    <input id="gym_name" placeholder="Enter gym name">
+
+    <label>Owner Username</label>
+    <input id="owner_name" disabled>
+
+    <label>Address</label>
+    <input id="address" placeholder="Enter address">
+
+    <label>Opening Time</label>
+    <input type="time" id="opening_time">
+
+    <label>Closing Time</label>
+    <input type="time" id="closing_time">
+
+    <label>Monthly Fee</label>
+    <input type="number" id="monthly_fee">
+
+    <label>Quarterly Fee</label>
+    <input type="number" id="quarterly_fee">
+
+    <label>Yearly Fee</label>
+    <input type="number" id="yearly_fee">
+
+    <button class="btn save" onclick="saveProfile()">Save Changes</button>
+    <button class="btn back" onclick="goBack()">Back to Dashboard</button>
+</div>
+
+<script>
+/* AUTH CHECK */
+if (!localStorage.getItem("token")) {
+    window.location.href = "/api/accounts/login-page/";
+}
+
+/* LOAD PROFILE DATA */
+fetch("/api/gym/profile/", {
+    headers: {
+        "Authorization": "Token " + localStorage.getItem("token")
+    }
+})
+.then(res => res.json())
+.then(data => {
+    gym_name.value = data.gym_name || "";
+    owner_name.value = data.owner_name || "";
+    address.value = data.address || "";
+    opening_time.value = data.opening_time || "";
+    closing_time.value = data.closing_time || "";
+    monthly_fee.value = data.monthly_fee || 0;
+    quarterly_fee.value = data.quarterly_fee || 0;
+    yearly_fee.value = data.yearly_fee || 0;
+});
+
+/* SAVE PROFILE DATA */
+function saveProfile() {
+    fetch("/api/gym/profile/", {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Token " + localStorage.getItem("token")
+        },
+        body: JSON.stringify({
+            gym_name: gym_name.value,
+            address: address.value,
+            opening_time: opening_time.value,
+            closing_time: closing_time.value,
+            monthly_fee: monthly_fee.value,
+            quarterly_fee: quarterly_fee.value,
+            yearly_fee: yearly_fee.value
+        })
+    })
+    .then(res => res.json())
+    .then(() => {
+        alert("Profile updated successfully");
+    });
+}
+
+function goBack() {
+    window.location.href = "/dashboard/";
+}
+</script>
+
+</body>
+</html>
