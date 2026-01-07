@@ -13,6 +13,7 @@ from rest_framework import status
 import random
 from django.core.mail import send_mail
 from .models import EmailOTP
+from django.views.decorators.csrf import ensure_csrf_cookie
 
 
 
@@ -164,7 +165,7 @@ class ResetPasswordAPI(APIView):
 # -------------------------------------------------
 # ---------------- PAGE VIEWS ---------------------
 # -------------------------------------------------
-
+@ensure_csrf_cookie
 def login_page(request):
     print("LOGIN PAGE HIT:", request.method, request.path)
     return render(request, "login.html")
