@@ -4,6 +4,7 @@ Firebase-based authentication (NO allauth, NO dj-rest-auth)
 """
 
 from pathlib import Path
+import os
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -12,8 +13,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # --------------------------------------------------
 
 SECRET_KEY = "django-insecure-b1jn*$#8zzyz*ef42&%%*6sz_jgo(e@^89n8-=-xko=5u@ztc3"
-DEBUG = True
-ALLOWED_HOSTS = []
+DEBUG = False
+ALLOWED_HOSTS = ["*"]
+
 
 # --------------------------------------------------
 # INSTALLED APPS
@@ -45,6 +47,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -81,14 +84,25 @@ WSGI_APPLICATION = "gym_management.wsgi.application"
 # DATABASE
 # --------------------------------------------------
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': 'gym_db',
+#         'USER': 'gym_user',
+#         'PASSWORD': 'gym123',
+#         'HOST': 'localhost',
+#         'PORT': '5432',
+#     }
+# }
+
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'gym_db',
-        'USER': 'gym_user',
-        'PASSWORD': 'gym123',
-        'HOST': 'localhost',
-        'PORT': '5432',
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": os.environ.get("DB_NAME"),
+        "USER": os.environ.get("DB_USER"),
+        "PASSWORD": os.environ.get("DB_PASSWORD"),
+        "HOST": os.environ.get("DB_HOST"),
+        "PORT": os.environ.get("DB_PORT", "5432"),
     }
 }
 
@@ -122,7 +136,14 @@ USE_TZ = True
 # --------------------------------------------------
 
 STATIC_URL = "/static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
+
 
 # --------------------------------------------------
 # REST FRAMEWORK (TOKEN AUTH)
