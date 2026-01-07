@@ -39,6 +39,9 @@
 </head>
 <body>
 
+<!-- ✅ CSRF TOKEN (ADDED – REQUIRED FOR PRODUCTION) -->
+<input type="hidden" id="csrf-token" value="{{ csrf_token }}">
+
 <div class="container">
     <div class="card">
         <h1>FitDesk</h1>
@@ -50,12 +53,11 @@
         <input type="password" id="login-password" placeholder="Password">
 
         <button onclick="login()">Login</button>
+
         <p class="link">
            <a href="/api/accounts/forgot-password-page/">Forgot Password?</a>
         </p>
 
-
-    
         <p class="link">
             Don’t have an account?
             <a href="/api/accounts/register-page/">Register</a>
@@ -79,8 +81,9 @@
     } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
     document.addEventListener("DOMContentLoaded", async () => {
+
         /* 🔥 FIREBASE CONFIG */
-       
+        // firebaseConfig is assumed to be already defined (UNCHANGED)
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
@@ -101,9 +104,15 @@
 
             const token = await result.user.getIdToken();
 
+            /* ✅ CSRF TOKEN READ */
+            const csrfToken = document.getElementById("csrf-token").value;
+
             const res = await fetch("/api/accounts/firebase-login/", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": csrfToken
+                },
                 body: JSON.stringify({ token })
             });
 
@@ -116,6 +125,7 @@
                     "Authorization": "Token " + data.token
                 }
             });
+
             const resultCheck = await checkRes.json();
 
             if (resultCheck.gym_exists) {
@@ -123,10 +133,11 @@
             } else {
                 window.location.href = "/api/gym/setup/";
             }
+
         } catch (error) {
             console.error("Firebase Redirect Error:", error);
         }
-    }); // <-- Added missing closing parenthesis and brace
+    });
 </script>
 
 </body>

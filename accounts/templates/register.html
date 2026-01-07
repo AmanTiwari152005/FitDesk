@@ -32,6 +32,9 @@
 </head>
 <body>
 
+<!-- ✅ CSRF TOKEN (ADDED – REQUIRED FOR PRODUCTION) -->
+<input type="hidden" id="csrf-token" value="{{ csrf_token }}">
+
 <div class="container">
     <div class="card">
         <h1><span></span>FitDesk</h1>

@@ -13,7 +13,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # --------------------------------------------------
 
 SECRET_KEY = "django-insecure-b1jn*$#8zzyz*ef42&%%*6sz_jgo(e@^89n8-=-xko=5u@ztc3"
-DEBUG = False
+DEBUG = os.environ.get("DEBUG") == "True"
+
 ALLOWED_HOSTS = ["*"]
 
 
@@ -178,6 +179,15 @@ EMAIL_HOST = "smtp.gmail.com"
 LOGIN_URL = "/api/accounts/login-page/"
 LOGIN_REDIRECT_URL = "/dashboard/"
 LOGOUT_REDIRECT_URL = "/api/accounts/login-page/"
+
+CSRF_TRUSTED_ORIGINS = [
+    "https://*.up.railway.app",
+]
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
+
+CSRF_COOKIE_SAMESITE = "Lax"
+SESSION_COOKIE_SAMESITE = "Lax"
 
 
 # --------------------------------------------------

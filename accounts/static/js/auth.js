@@ -1,6 +1,4 @@
 // ---------------- AUTH GUARD ----------------
-// ---------------- AUTH GUARD ----------------
-// ---------------- AUTH GUARD ----------------
 const PUBLIC_PAGES = [
     "/api/accounts/login-page/",
     "/api/accounts/register-page/",
@@ -10,7 +8,6 @@ const PUBLIC_PAGES = [
 ];
 
 const currentPath = window.location.pathname;
-
 const isPublicPage = PUBLIC_PAGES.some(page => currentPath.startsWith(page));
 
 if (!isPublicPage) {
@@ -19,6 +16,9 @@ if (!isPublicPage) {
     }
 }
 
+/* ✅ CSRF TOKEN (ADDED – REQUIRED FOR PRODUCTION) */
+const csrfTokenInput = document.getElementById("csrf-token");
+const CSRF_TOKEN = csrfTokenInput ? csrfTokenInput.value : "";
 
 
 // ---------------- LOGIN ----------------
@@ -28,7 +28,10 @@ function login() {
 
     fetch("/api/accounts/login/", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": CSRF_TOKEN
+        },
         body: JSON.stringify({ username, password })
     })
     .then(res => res.json())
@@ -64,7 +67,10 @@ function register() {
 
     fetch("/api/accounts/register/", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": CSRF_TOKEN
+        },
         body: JSON.stringify({ username, email, password })
     })
     .then(res => res.json())
@@ -99,7 +105,10 @@ function verifyOTP() {
 
     fetch("/api/accounts/verify-otp/", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": CSRF_TOKEN
+        },
         body: JSON.stringify({ email, otp })
     })
     .then(res => res.json())
@@ -121,13 +130,17 @@ function verifyOTP() {
     .catch(() => alert("OTP verification error"));
 }
 
+
 // -------- FORGOT PASSWORD --------
 function forgotPassword() {
     const identifier = document.getElementById("fp-identifier").value;
 
     fetch("/api/accounts/forgot-password/", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": CSRF_TOKEN
+        },
         body: JSON.stringify({ identifier })
     })
     .then(res => res.json())
@@ -147,7 +160,10 @@ function resetPassword() {
 
     fetch("/api/accounts/reset-password/", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": CSRF_TOKEN
+        },
         body: JSON.stringify({ password })
     })
     .then(res => res.json())
@@ -160,4 +176,3 @@ function resetPassword() {
         window.location.href = "/api/accounts/login-page/";
     });
 }
-
