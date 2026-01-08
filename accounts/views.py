@@ -160,6 +160,15 @@ class ResetPasswordAPI(APIView):
 
         return Response({"success": True})
 
+from rest_framework.decorators import api_view
+
+@api_view(["GET"])
+def check_session(request):
+    if request.user.is_authenticated:
+        return Response({"authenticated": True})
+    return Response({"authenticated": False}, status=401)
+
+
 
 # -------------------------------------------------
 # ---------------- PAGE VIEWS ---------------------

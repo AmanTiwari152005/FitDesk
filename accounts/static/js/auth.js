@@ -11,12 +11,18 @@ const currentPath = window.location.pathname;
 const isPublicPage = PUBLIC_PAGES.some(page => currentPath.startsWith(page));
 
 if (!isPublicPage) {
-    if (!localStorage.getItem("token")) {
-        window.location.href = "/api/accounts/login-page/";
-    }
+    fetch("/api/accounts/check-session/")
+        .then(res => {
+            if (res.status === 401) {
+                window.location.href = "/api/accounts/login-page/";
+            }
+        })
+        .catch(() => {
+            window.location.href = "/api/accounts/login-page/";
+        });
 }
 
-/* ✅ CSRF TOKEN (ADDED – REQUIRED FOR PRODUCTION) */
+/* ✅ CSRF TOKEN */
 const csrfTokenInput = document.getElementById("csrf-token");
 const CSRF_TOKEN = csrfTokenInput ? csrfTokenInput.value : "";
 
@@ -41,19 +47,8 @@ function login() {
             return;
         }
 
-        localStorage.setItem("token", data.token);
-
-        fetch("/api/gym/check/", {
-            headers: { "Authorization": "Token " + data.token }
-        })
-        .then(res => res.json())
-        .then(result => {
-            if (result.gym_exists) {
-                window.location.href = "/dashboard/";
-            } else {
-                window.location.href = "/api/gym/setup/";
-            }
-        });
+        // ✅ SESSION IS NOW ACTIVE
+        window.location.href = "/dashboard/";
     })
     .catch(() => alert("Login error"));
 }
@@ -80,12 +75,8 @@ function register() {
             return;
         }
 
-        // ✅ STORE EMAIL FOR OTP VERIFICATION
         localStorage.setItem("otp_email", email);
-
         alert("OTP sent to your email");
-
-        // ✅ REDIRECT TO VERIFY OTP PAGE
         window.location.href = "/api/accounts/verify-otp-page/";
     })
     .catch(() => alert("Registration error"));
@@ -118,13 +109,8 @@ function verifyOTP() {
             return;
         }
 
-        // ✅ OTP VERIFIED
-        alert("OTP verified successfully");
-
-        // cleanup
         localStorage.removeItem("otp_email");
-
-        // ✅ REDIRECT TO LOGIN PAGE
+        alert("OTP verified successfully");
         window.location.href = "/api/accounts/login-page/";
     })
     .catch(() => alert("OTP verification error"));
