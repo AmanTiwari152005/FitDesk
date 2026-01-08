@@ -1,20 +1,16 @@
-
-
-from django.contrib.auth import authenticate
+from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
 from django.shortcuts import render
-from django.contrib.auth.decorators import login_required
+from django.views.decorators.csrf import ensure_csrf_cookie
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
-from rest_framework.authtoken.models import Token
 from rest_framework import status
+
 import random
 from django.core.mail import send_mail
 from .models import EmailOTP
-from django.views.decorators.csrf import ensure_csrf_cookie
-
 
 
 # -------------------------------------------------
@@ -65,7 +61,7 @@ class RegisterAPI(APIView):
             username=username,
             email=email,
             password=password,
-            is_active=False   # 🔥 IMPORTANT
+            is_active=False
         )
 
         otp = str(random.randint(100000, 999999))
@@ -88,49 +84,21 @@ class RegisterAPI(APIView):
         })
 
 
-
-# class LoginAPI(APIView):
-#     permission_classes = [AllowAny]
-
-#     def post(self, request):
-#         username = request.data.get("username")
-#         password = request.data.get("password")
-
-#         if not username or not password:
-#             return Response({
-#                 "success": False,
-#                 "message": "Username and password required"
-#             }, status=400)
-
-#         user = authenticate(username=username, password=password)
-
-#         if user is None:
-#             return Response({
-#                 "success": False,
-#                 "message": "Invalid credentials"
-#             }, status=401)
-
-#         token, _ = Token.objects.get_or_create(user=user)
-
-#         return Response({
-#             "success": True,
-#             "token": token.key
-#         })
 class LoginAPI(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
-        print("🔥 LOGIN API HIT")
-        print("📦 DATA:", request.data)
-
         try:
             username = request.data.get("username")
             password = request.data.get("password")
 
-            print("👤 USERNAME:", username)
+            if not username or not password:
+                return Response(
+                    {"success": False, "message": "Username and password required"},
+                    status=400
+                )
 
             user = authenticate(username=username, password=password)
-            print("✅ AUTH RESULT:", user)
 
             if user is None:
                 return Response(
@@ -138,19 +106,21 @@ class LoginAPI(APIView):
                     status=401
                 )
 
-            token, _ = Token.objects.get_or_create(user=user)
+            # ✅ SESSION LOGIN (NO TOKENS, NO MIGRATIONS)
+            login(request, user)
 
             return Response({
                 "success": True,
-                "token": token.key
+                "message": "Login successful"
             })
 
         except Exception as e:
-            print("❌ LOGIN CRASH:", str(e))
-            raise
+            print("LOGIN ERROR:", e)
+            return Response(
+                {"success": False, "message": "Server error"},
+                status=500
+            )
 
-
-from django.contrib.auth.models import User
 
 class ForgotPasswordAPI(APIView):
     permission_classes = [AllowAny]
@@ -170,7 +140,7 @@ class ForgotPasswordAPI(APIView):
         request.session["reset_user_id"] = user.id
 
         return Response({"success": True})
-    
+
 
 class ResetPasswordAPI(APIView):
     permission_classes = [AllowAny]
@@ -191,37 +161,26 @@ class ResetPasswordAPI(APIView):
         return Response({"success": True})
 
 
-
-
-
-
 # -------------------------------------------------
 # ---------------- PAGE VIEWS ---------------------
 # -------------------------------------------------
+
 @ensure_csrf_cookie
 def login_page(request):
-    print("LOGIN PAGE HIT:", request.method, request.path)
     return render(request, "login.html")
 
 
 def register_page(request):
-    print("REGISTER PAGE HIT:", request.method, request.path)
     return render(request, "register.html")
 
-
-
-def profile_page(request):
-    return render(request, "profile.html")
-
-
-def add_expense_page(request):
-    return render(request, "add_expense.html")
 
 def verify_otp_page(request):
     return render(request, "verify_otp.html")
 
+
 def forgot_password_page(request):
     return render(request, "forgot_password.html")
+
 
 def reset_password_page(request):
     return render(request, "reset_password.html")
