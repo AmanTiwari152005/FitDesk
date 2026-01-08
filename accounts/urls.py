@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import ForgotPasswordAPI, RegisterAPI, LoginAPI, ResetPasswordAPI, check_session, forgot_password_page, login_page, register_page, VerifyOTPAPI, reset_password_page
+from .views import ForgotPasswordAPI, RegisterAPI, LoginAPI, ResetPasswordAPI, forgot_password_page, login_page, register_page, VerifyOTPAPI, reset_password_page
 #from .views import GoogleLoginAPI
 
 from . import views
@@ -11,7 +11,7 @@ urlpatterns = [
     path("verify-otp/", VerifyOTPAPI.as_view()),
     path("forgot-password/", ForgotPasswordAPI.as_view()),
     path("reset-password/", ResetPasswordAPI.as_view()),
-    path("check-session/", check_session),
+    
 
    # path("google-login/", GoogleLoginAPI.as_view()),
    
