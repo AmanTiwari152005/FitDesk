@@ -206,3 +206,27 @@ SESSION_COOKIE_SAMESITE = "Lax"
 # ✔ dj-rest-auth REMOVED
 # ✔ Firebase handles Google auth
 # ✔ Django only verifies Firebase token
+
+
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+        },
+    },
+    "root": {
+        "handlers": ["console"],
+        "level": "DEBUG",
+    },
+    "loggers": {
+        "django": {
+            "handlers": ["console"],
+            "level": "DEBUG",
+            "propagate": True,
+        },
+    },
+}
+

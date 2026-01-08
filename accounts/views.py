@@ -89,33 +89,66 @@ class RegisterAPI(APIView):
 
 
 
+# class LoginAPI(APIView):
+#     permission_classes = [AllowAny]
+
+#     def post(self, request):
+#         username = request.data.get("username")
+#         password = request.data.get("password")
+
+#         if not username or not password:
+#             return Response({
+#                 "success": False,
+#                 "message": "Username and password required"
+#             }, status=400)
+
+#         user = authenticate(username=username, password=password)
+
+#         if user is None:
+#             return Response({
+#                 "success": False,
+#                 "message": "Invalid credentials"
+#             }, status=401)
+
+#         token, _ = Token.objects.get_or_create(user=user)
+
+#         return Response({
+#             "success": True,
+#             "token": token.key
+#         })
 class LoginAPI(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
-        username = request.data.get("username")
-        password = request.data.get("password")
+        print("🔥 LOGIN API HIT")
+        print("📦 DATA:", request.data)
 
-        if not username or not password:
+        try:
+            username = request.data.get("username")
+            password = request.data.get("password")
+
+            print("👤 USERNAME:", username)
+
+            user = authenticate(username=username, password=password)
+            print("✅ AUTH RESULT:", user)
+
+            if user is None:
+                return Response(
+                    {"success": False, "message": "Invalid credentials"},
+                    status=401
+                )
+
+            token, _ = Token.objects.get_or_create(user=user)
+
             return Response({
-                "success": False,
-                "message": "Username and password required"
-            }, status=400)
+                "success": True,
+                "token": token.key
+            })
 
-        user = authenticate(username=username, password=password)
+        except Exception as e:
+            print("❌ LOGIN CRASH:", str(e))
+            raise
 
-        if user is None:
-            return Response({
-                "success": False,
-                "message": "Invalid credentials"
-            }, status=401)
-
-        token, _ = Token.objects.get_or_create(user=user)
-
-        return Response({
-            "success": True,
-            "token": token.key
-        })
 
 from django.contrib.auth.models import User
 
