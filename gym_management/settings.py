@@ -4,7 +4,7 @@ Firebase-based authentication (NO allauth, NO dj-rest-auth)
 """
 
 from pathlib import Path
-import os
+
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -103,16 +103,17 @@ WSGI_APPLICATION = "gym_management.wsgi.application"
 #     }
 # }
 
+import os
+import dj_database_url
+
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": os.environ.get("DB_NAME"),
-        "USER": os.environ.get("DB_USER"),
-        "PASSWORD": os.environ.get("DB_PASSWORD"),
-        "HOST": os.environ.get("DB_HOST"),
-        "PORT": os.environ.get("DB_PORT", "5432"),
-    }
+    "default": dj_database_url.parse(
+        os.environ.get("DATABASE_URL"),
+        conn_max_age=600,
+        ssl_require=True,
+    )
 }
+
 
 
 
