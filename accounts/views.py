@@ -39,12 +39,18 @@ class RegisterAPI(APIView):
         otp = str(random.randint(100000, 999999))
         EmailOTP.objects.update_or_create(user=user, defaults={"otp": otp})
 
-        send_mail(
-            subject="Verify your account",
-            message=f"Your verification code is {otp}",
-            from_email=None,
-            recipient_list=[email],
-        )
+        try:
+         send_mail(
+                subject="Verify your account",
+                message=f"Your verification code is {otp}",
+                from_email=None,
+                recipient_list=[email],
+                fail_silently=True,  # 🔥 IMPORTANT
+            )
+        except Exception as e:
+            print("Email error:", e)
+        except Exception as e:
+            print("Email error:", e)
 
         return Response({"success": True})
 
