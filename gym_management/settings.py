@@ -4,7 +4,7 @@ Firebase-based authentication (NO allauth, NO dj-rest-auth)
 """
 
 from pathlib import Path
-
+import os
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -103,7 +103,7 @@ WSGI_APPLICATION = "gym_management.wsgi.application"
 #     }
 # }
 
-import os
+
 import dj_database_url
 
 DATABASES = {
