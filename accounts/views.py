@@ -137,9 +137,27 @@ def verify_otp_page(request):
     return render(request, "verify_otp.html")
 
 
+def forgot_password_page(request):
+    return render(request, "forgot_password.html")
+
+
+def reset_password_page(request):
+    return render(request, "reset_password.html")
+
+
 @login_required(login_url="/api/accounts/login-page/")
 def dashboard_page(request):
     return render(request, "dashboard.html")
+
+
+@login_required(login_url="/api/accounts/login-page/")
+def profile_page(request):
+    return render(request, "profile.html")
+
+
+@login_required(login_url="/api/accounts/login-page/")
+def add_expense_page(request):
+    return render(request, "add_expense.html")
 
 
 def logout_view(request):
