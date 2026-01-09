@@ -18,7 +18,7 @@ SECRET_KEY = os.environ.get(
     "django-insecure-change-this-in-production"
 )
 
-DEBUG = os.environ.get("DEBUG", "False") == "True"
+DEBUG = False
 
 ALLOWED_HOSTS = ["*"]
 
@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     "expenses",
 ]
 
+
 # --------------------------------------------------
 # MIDDLEWARE
 # --------------------------------------------------
@@ -60,6 +61,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
 ]
 
 # --------------------------------------------------
@@ -185,14 +187,23 @@ LOGIN_URL = "/api/accounts/login-page/"
 LOGIN_REDIRECT_URL = "/dashboard/"
 LOGOUT_REDIRECT_URL = "/api/accounts/login-page/"
 
-CSRF_TRUSTED_ORIGINS = [
-    "https://*.up.railway.app",
-]
+
 CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_SECURE = True
 
 CSRF_COOKIE_SAMESITE = "Lax"
 SESSION_COOKIE_SAMESITE = "Lax"
+
+CORS_ALLOWED_ORIGINS = [
+    "https://fitdesk.onrender.com",
+]
+
+CORS_ALLOW_CREDENTIALS = True
+
+CSRF_TRUSTED_ORIGINS = [
+    "https://fitdesk.onrender.com",
+]
+
 
 
 # --------------------------------------------------

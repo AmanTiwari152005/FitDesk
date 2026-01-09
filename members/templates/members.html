@@ -296,11 +296,30 @@ let allMembers = [];
 let currentFilter = "all";
 let selectedMemberId = null;
 
-fetch("/api/members/list/", {
-    headers: { Authorization: "Token " + localStorage.getItem("token") }
+/* 🔐 SESSION AUTH CHECK */
+fetch("https://fitdesk.onrender.com/api/accounts/login/", {
+    credentials: "include"
 })
-.then(res => res.json())
+.then(res => {
+    if (res.status === 401) {
+        window.location.href = "/login.html";
+    }
+});
+
+/* 📋 FETCH MEMBERS LIST */
+fetch("https://fitdesk.onrender.com/api/members/list/", {
+    credentials: "include"
+})
+.then(res => {
+    if (!res.ok) {
+        alert("Session expired. Please login again.");
+        window.location.href = "/login.html";
+        return;
+    }
+    return res.json();
+})
 .then(data => {
+    if (!data) return;
     allMembers = data.members || [];
     renderMembers();
 });
@@ -331,8 +350,8 @@ function renderMembers() {
     filtered.forEach(m => {
         const exp = new Date(m.expiry_date);
         let status = "active", text = "Active";
-        if (exp < today) { status="expired"; text="Expired"; }
-        else if (exp <= soon) { status="expiring"; text="Expiring Soon"; }
+        if (exp < today) { status = "expired"; text = "Expired"; }
+        else if (exp <= soon) { status = "expiring"; text = "Expiring Soon"; }
 
         grid.innerHTML += `
             <div class="member-card">
@@ -351,7 +370,7 @@ function renderMembers() {
 }
 
 function viewHistory(id) {
-    window.location.href = `/renewal-history/?id=${id}`;
+    window.location.href = `/renewal-history.html?id=${id}`;
 }
 
 function openRenew(id) {
@@ -364,29 +383,46 @@ function closeModal() {
 }
 
 function submitRenew() {
-    fetch(`/api/members/renew/${selectedMemberId}/`, {
+    fetch(`https://fitdesk.onrender.com/api/members/renew/${selectedMemberId}/`, {
         method: "POST",
         headers: {
-            "Content-Type": "application/json",
-            "Authorization": "Token " + localStorage.getItem("token")
+            "Content-Type": "application/json"
         },
+        credentials: "include",
         body: JSON.stringify({
             package: document.getElementById("renewPackage").value,
             join_date: document.getElementById("renewJoin").value,
             expiry_date: document.getElementById("renewExpiry").value
         })
     })
-    .then(() => location.reload());
+    .then(res => {
+        if (!res.ok) {
+            alert("Session expired. Please login again.");
+            window.location.href = "/login.html";
+            return;
+        }
+        location.reload();
+    });
 }
 
 function deleteMember(id) {
     if (!confirm("Delete member?")) return;
-    fetch(`/api/members/delete/${id}/`, {
+
+    fetch(`https://fitdesk.onrender.com/api/members/delete/${id}/`, {
         method: "DELETE",
-        headers: { Authorization: "Token " + localStorage.getItem("token") }
-    }).then(() => location.reload());
+        credentials: "include"
+    })
+    .then(res => {
+        if (!res.ok) {
+            alert("Session expired. Please login again.");
+            window.location.href = "/login.html";
+            return;
+        }
+        location.reload();
+    });
 }
 </script>
+
 
 </body>
 </html>

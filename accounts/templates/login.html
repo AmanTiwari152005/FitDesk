@@ -83,8 +83,7 @@
     document.addEventListener("DOMContentLoaded", async () => {
 
         /* 🔥 FIREBASE CONFIG */
-        // firebaseConfig is assumed to be already defined (UNCHANGED)
-
+        // firebaseConfig must already be defined
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const provider = new GoogleAuthProvider();
@@ -99,39 +98,42 @@
         /* 🔁 HANDLE REDIRECT RESULT */
         try {
             const result = await getRedirectResult(auth);
-
             if (!result || !result.user) return;
 
-            const token = await result.user.getIdToken();
+            const firebaseToken = await result.user.getIdToken();
 
-            /* ✅ CSRF TOKEN READ */
-            const csrfToken = document.getElementById("csrf-token").value;
-
-            const res = await fetch("/api/accounts/firebase-login/", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-CSRFToken": csrfToken
-                },
-                body: JSON.stringify({ token })
-            });
-
-            const data = await res.json();
-            localStorage.setItem("token", data.token);
-
-            // 🔥 REDIRECT BASED ON USER TYPE
-            const checkRes = await fetch("/api/gym/check/", {
-                headers: {
-                    "Authorization": "Token " + data.token
+            /* 🔐 SEND FIREBASE TOKEN TO DJANGO (SESSION LOGIN) */
+            const res = await fetch(
+                "https://fitdesk.onrender.com/api/accounts/firebase-login/",
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    credentials: "include",   // ✅ VERY IMPORTANT
+                    body: JSON.stringify({ token: firebaseToken })
                 }
-            });
+            );
+
+            if (!res.ok) {
+                alert("Firebase login failed");
+                return;
+            }
+
+            /* 🔥 CHECK USER STATE (SESSION BASED) */
+            const checkRes = await fetch(
+                "https://fitdesk.onrender.com/api/gym/check/",
+                {
+                    credentials: "include"   // ✅ SESSION
+                }
+            );
 
             const resultCheck = await checkRes.json();
 
             if (resultCheck.gym_exists) {
-                window.location.href = "/dashboard/";
+                window.location.href = "/dashboard.html";
             } else {
-                window.location.href = "/api/gym/setup/";
+                window.location.href = "/gym-setup.html";
             }
 
         } catch (error) {
@@ -139,6 +141,7 @@
         }
     });
 </script>
+
 
 </body>
 </html>

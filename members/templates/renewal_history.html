@@ -156,13 +156,31 @@
 <script>
 const memberId = new URLSearchParams(window.location.search).get("id");
 
-fetch(`/api/members/renewal-history/${memberId}/`, {
-    headers: {
-        "Authorization": "Token " + localStorage.getItem("token")
-    }
+/* 🔐 SESSION AUTH CHECK */
+fetch("https://fitdesk.onrender.com/api/accounts/login/", {
+    credentials: "include"
 })
-.then(res => res.json())
+.then(res => {
+    if (res.status === 401) {
+        window.location.href = "/login.html";
+    }
+});
+
+/* 📜 FETCH RENEWAL HISTORY */
+fetch(`https://fitdesk.onrender.com/api/members/renewal-history/${memberId}/`, {
+    credentials: "include"
+})
+.then(res => {
+    if (!res.ok) {
+        alert("Session expired. Please login again.");
+        window.location.href = "/login.html";
+        return;
+    }
+    return res.json();
+})
 .then(data => {
+    if (!data) return;
+
     document.getElementById("memberName").innerText =
         "Renewal History – " + data.member_name;
 
@@ -208,6 +226,7 @@ fetch(`/api/members/renewal-history/${memberId}/`, {
     `;
 });
 </script>
+
 
 </body>
 </html>

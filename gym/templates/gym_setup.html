@@ -121,23 +121,27 @@
 /* 🔍 DEBUG CHECK */
 console.log("Gym setup JS loaded");
 
-/* 🔐 TOKEN CHECK */
-const token = localStorage.getItem("token");
-if (!token) {
-    alert("Login required");
-    window.location.href = "/api/accounts/login-page/";
-}
+/* 🔐 SESSION CHECK */
+fetch("https://fitdesk.onrender.com/api/accounts/login/", {
+    credentials: "include"
+})
+.then(res => {
+    if (res.status === 401) {
+        alert("Login required");
+        window.location.href = "/login.html";
+    }
+});
 
 /* 🔥 BUTTON HANDLER */
 document.getElementById("setupBtn").addEventListener("click", () => {
     console.log("Setup button clicked");
 
-    fetch("/api/gym/setup/create/", {
+    fetch("https://fitdesk.onrender.com/api/gym/setup/create/", {
         method: "POST",
         headers: {
-            "Content-Type": "application/json",
-            "Authorization": "Token " + token
+            "Content-Type": "application/json"
         },
+        credentials: "include",   // ✅ VERY IMPORTANT
         body: JSON.stringify({
             gym_name: document.getElementById("gym_name").value,
             address: document.getElementById("address").value,
@@ -150,13 +154,20 @@ document.getElementById("setupBtn").addEventListener("click", () => {
     })
     .then(res => {
         console.log("Response status:", res.status);
+        if (!res.ok) {
+            alert("Session expired. Please login again.");
+            window.location.href = "/login.html";
+            return;
+        }
         return res.json();
     })
     .then(data => {
+        if (!data) return;
+
         console.log("Response data:", data);
 
         if (data.success) {
-            window.location.href = "/dashboard/";
+            window.location.href = "/dashboard.html";
         } else {
             alert(data.message || "Setup failed");
         }
@@ -167,6 +178,7 @@ document.getElementById("setupBtn").addEventListener("click", () => {
     });
 });
 </script>
+
 
 </body>
 </html>
