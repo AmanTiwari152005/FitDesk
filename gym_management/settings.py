@@ -6,7 +6,7 @@ Firebase-based authentication (NO allauth, NO dj-rest-auth)
 from pathlib import Path
 import os
 
-import dj_database_url
+
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -98,16 +98,28 @@ WSGI_APPLICATION = "gym_management.wsgi.application"
 #         'NAME': 'gym_db',
 #         'USER': 'gym_user',
 #         'PASSWORD': 'gym123',
-#         'HOST': 'localhost',
+#         'HOST': 'dpg-d5g7ufu3jp1c73bsbd00-a.oregon-postgres.render.com',
 #         'PORT': '5432',
 #     }
 # }
 
-
+import os
 
 DATABASES = {
-    "default": dj_database_url.config(default=os.getenv("DATABASE_URL"))
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": os.getenv("DB_NAME"),
+        "USER": os.getenv("DB_USER"),
+        "PASSWORD": os.getenv("DB_PASSWORD"),
+        "HOST": os.getenv("DB_HOST"),
+        "PORT": os.getenv("DB_PORT", "5432"),
+    }
 }
+
+
+
+
+
 
 
 
@@ -234,6 +246,11 @@ LOGGING = {
         },
     },
 }
+
+CSRF_TRUSTED_ORIGINS = ["https://fitdesk.onrender.com"]
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+CORS_ALLOW_ALL_ORIGINS = True
+SECURE_SSL_REDIRECT = True
 
 
 
