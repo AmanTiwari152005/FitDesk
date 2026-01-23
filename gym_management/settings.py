@@ -12,15 +12,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # BASIC CONFIG
 # --------------------------------------------------
 
-# SECRET_KEY = "django-insecure-b1jn*$#8zzyz*ef42&%%*6sz_jgo(e@^89n8-=-xko=5u@ztc3"
-SECRET_KEY = os.environ.get(
-    "SECRET_KEY",
-    "django-insecure-change-this-in-production"
-)
+SECRET_KEY = "django-insecure-b1jn*$#8zzyz*ef42&%%*6sz_jgo(e@^89n8-=-xko=5u@ztc3"
 
-DEBUG = False
 
-ALLOWED_HOSTS = ["*"]
+DEBUG = True
+
+ALLOWED_HOSTS = []
 
 
 # --------------------------------------------------
@@ -92,27 +89,19 @@ WSGI_APPLICATION = "gym_management.wsgi.application"
 # DATABASE
 # --------------------------------------------------
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': 'gym_db',
-#         'USER': 'gym_user',
-#         'PASSWORD': 'gym123',
-#         'HOST': 'localhost',
-#         'PORT': '5432',
-#     }
-# }
-
-
-import dj_database_url
-
 DATABASES = {
-    "default": dj_database_url.parse(
-        os.environ.get("DATABASE_URL"),
-        conn_max_age=600,
-        ssl_require=True,
-    )
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'gym_db',
+        'USER': 'gym_user',
+        'PASSWORD': 'gym123',
+        'HOST': 'localhost',
+        'PORT': '5432',
+    }
 }
+
+
+
 
 
 
@@ -146,10 +135,6 @@ USE_TZ = True
 
 STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
-
-STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
-
-DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
 
@@ -175,14 +160,19 @@ AUTHENTICATION_BACKENDS = [
     "django.contrib.auth.backends.ModelBackend",
 ]
 
-EMAIL_HOST_USER = "atiwary489@gmail.com"
-EMAIL_HOST_PASSWORD = "gclujiyajdmzhtry"
-DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+# ---------------- EMAIL CONFIG (GMAIL SMTP) ----------------
 
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-EMAIL_USE_TLS = True
-EMAIL_PORT = 587
+
 EMAIL_HOST = "smtp.gmail.com"
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+
+EMAIL_HOST_USER = "atiwary489@gmail.com"
+EMAIL_HOST_PASSWORD = "gclujiyajdmzhtry"
+
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
 
 LOGIN_URL = "/api/accounts/login-page/"
 LOGIN_REDIRECT_URL = "/dashboard/"
@@ -192,18 +182,9 @@ LOGOUT_REDIRECT_URL = "/api/accounts/login-page/"
 CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_SECURE = True
 
-CSRF_COOKIE_SAMESITE = "Lax"
-SESSION_COOKIE_SAMESITE = "Lax"
 
-CORS_ALLOWED_ORIGINS = [
-    "https://fitdesk.onrender.com",
-]
 
-CORS_ALLOW_CREDENTIALS = True
 
-CSRF_TRUSTED_ORIGINS = [
-    "https://fitdesk.onrender.com",
-]
 
 
 
@@ -245,7 +226,5 @@ LOGGING = {
     },
 }
 
-EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
-if not DEBUG:
-    EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+
 

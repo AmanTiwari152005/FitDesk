@@ -153,30 +153,19 @@
 </div>
 
 <script>
-/* AUTH CHECK (SESSION BASED) */
-fetch("https://fitdesk.onrender.com/api/accounts/login/", {
-    credentials: "include"
-}).then(res => {
-    if (res.status === 401) {
-        window.location.href = "/login.html";
-    }
-});
+/* AUTH CHECK */
+if (!localStorage.getItem("token")) {
+    window.location.href = "/api/accounts/login-page/";
+}
 
 /* LOAD PROFILE DATA */
-fetch("https://fitdesk.onrender.com/api/gym/profile/", {
-    credentials: "include"
-})
-.then(res => {
-    if (!res.ok) {
-        alert("Please login again");
-        window.location.href = "/login.html";
-        return;
+fetch("/api/gym/profile/", {
+    headers: {
+        "Authorization": "Token " + localStorage.getItem("token")
     }
-    return res.json();
 })
+.then(res => res.json())
 .then(data => {
-    if (!data) return;
-
     gym_name.value = data.gym_name || "";
     owner_name.value = data.owner_name || "";
     address.value = data.address || "";
@@ -189,12 +178,12 @@ fetch("https://fitdesk.onrender.com/api/gym/profile/", {
 
 /* SAVE PROFILE DATA */
 function saveProfile() {
-    fetch("https://fitdesk.onrender.com/api/gym/profile/", {
+    fetch("/api/gym/profile/", {
         method: "PUT",
         headers: {
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "Authorization": "Token " + localStorage.getItem("token")
         },
-        credentials: "include",
         body: JSON.stringify({
             gym_name: gym_name.value,
             address: address.value,
@@ -205,24 +194,16 @@ function saveProfile() {
             yearly_fee: yearly_fee.value
         })
     })
-    .then(res => {
-        if (!res.ok) {
-            alert("Session expired. Please login again.");
-            window.location.href = "/login.html";
-            return;
-        }
-        return res.json();
-    })
+    .then(res => res.json())
     .then(() => {
         alert("Profile updated successfully");
     });
 }
 
 function goBack() {
-    window.location.href = "/dashboard.html";
+    window.location.href = "/dashboard/";
 }
 </script>
-
 
 </body>
 </html>

@@ -39,7 +39,7 @@
 </head>
 <body>
 
-<!-- ✅ CSRF TOKEN (ADDED – REQUIRED FOR PRODUCTION) -->
+<!-- ✅ CSRF TOKEN -->
 <input type="hidden" id="csrf-token" value="{{ csrf_token }}">
 
 <div class="container">
@@ -52,7 +52,9 @@
         <input type="text" id="login-username" placeholder="Username">
         <input type="password" id="login-password" placeholder="Password">
 
-        <button onclick="login()">Login</button>
+        <!-- ✅ FIXED: correct function name -->
+        <button type="button" onclick="login()">Login</button>
+
 
         <p class="link">
            <a href="/api/accounts/forgot-password-page/">Forgot Password?</a>
@@ -69,78 +71,9 @@
     </div>
 </div>
 
+<!-- ✅ NORMAL SCRIPT (IMPORTANT) -->
 <script src="{% static 'js/auth.js' %}"></script>
 
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { 
-        getAuth, 
-        GoogleAuthProvider, 
-        signInWithRedirect, 
-        getRedirectResult 
-    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-
-    document.addEventListener("DOMContentLoaded", async () => {
-
-        /* 🔥 FIREBASE CONFIG */
-        // firebaseConfig must already be defined
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const provider = new GoogleAuthProvider();
-
-        const googleBtn = document.getElementById("googleBtn");
-
-        /* 🔐 START GOOGLE LOGIN */
-        googleBtn.addEventListener("click", () => {
-            signInWithRedirect(auth, provider);
-        });
-
-        /* 🔁 HANDLE REDIRECT RESULT */
-        try {
-            const result = await getRedirectResult(auth);
-            if (!result || !result.user) return;
-
-            const firebaseToken = await result.user.getIdToken();
-
-            /* 🔐 SEND FIREBASE TOKEN TO DJANGO (SESSION LOGIN) */
-            const res = await fetch(
-                "https://fitdesk.onrender.com/api/accounts/firebase-login/",
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    credentials: "include",   // ✅ VERY IMPORTANT
-                    body: JSON.stringify({ token: firebaseToken })
-                }
-            );
-
-            if (!res.ok) {
-                alert("Firebase login failed");
-                return;
-            }
-
-            /* 🔥 CHECK USER STATE (SESSION BASED) */
-            const checkRes = await fetch(
-                "https://fitdesk.onrender.com/api/gym/check/",
-                {
-                    credentials: "include"   // ✅ SESSION
-                }
-            );
-
-            const resultCheck = await checkRes.json();
-
-            if (resultCheck.gym_exists) {
-                window.location.href = "/dashboard.html";
-            } else {
-                window.location.href = "/gym-setup.html";
-            }
-
-        } catch (error) {
-            console.error("Firebase Redirect Error:", error);
-        }
-    });
-</script>
 
 
 </body>

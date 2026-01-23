@@ -220,36 +220,25 @@
 </div>
 
 <script>
-/* 🔐 SESSION AUTH CHECK */
-fetch("https://fitdesk.onrender.com/api/accounts/login/", {
-    credentials: "include"
-})
-.then(res => {
-    if (res.status === 401) {
-        window.location.href = "/login.html";
-    }
-});
+/* AUTH CHECK */
+if (!localStorage.getItem("token")) {
+    window.location.href = "/api/accounts/login-page/";
+}
 
-/* FETCH REAL GYM DASHBOARD DATA */
-fetch("https://fitdesk.onrender.com/api/gym/dashboard-data/", {
-    credentials: "include"
-})
-.then(res => {
-    if (!res.ok) {
-        alert("Session expired. Please login again.");
-        window.location.href = "/login.html";
-        return;
+/* FETCH REAL GYM NAME */
+fetch("/api/gym/dashboard-data/", {
+    headers: {
+        "Authorization": "Token " + localStorage.getItem("token")
     }
-    return res.json();
 })
+.then(res => res.json())
 .then(data => {
-    if (!data) return;
+    document.getElementById("gymName").innerText = data.gym_name;
+    document.getElementById("memberName").innerText = data.member_name;
+    document.getElementById("package").innerText = data.package;
+    document.getElementById("joinDate").innerText = data.join_date;
+    document.getElementById("expiryDate").innerText = data.expiry_date;
 
-    document.getElementById("gymName").innerText = data.gym_name || "";
-    document.getElementById("memberName").innerText = data.member_name || "";
-    document.getElementById("package").innerText = data.package || "";
-    document.getElementById("joinDate").innerText = data.join_date || "";
-    document.getElementById("expiryDate").innerText = data.expiry_date || "";
 });
 
 /* SAVE MEMBER */
@@ -264,28 +253,19 @@ function saveMember() {
         expiry_date: document.getElementById("expiry_date").value
     };
 
-    // 🔍 DEBUG (kept as requested)
+    // 🔍 DEBUG (keep for now)
     console.log("📤 Sending payload:", payload);
 
-    fetch("https://fitdesk.onrender.com/api/members/add/", {
+    fetch("/api/members/add/", {
         method: "POST",
         headers: {
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "Authorization": "Token " + localStorage.getItem("token")
         },
-        credentials: "include",   // ✅ SESSION COOKIE
         body: JSON.stringify(payload)
     })
-    .then(res => {
-        if (!res.ok) {
-            alert("Session expired. Please login again.");
-            window.location.href = "/login.html";
-            return;
-        }
-        return res.json();
-    })
+    .then(res => res.json())
     .then(data => {
-        if (!data) return;
-
         if (data.error) {
             alert("Error: " + JSON.stringify(data));
             return;
@@ -300,10 +280,9 @@ function saveMember() {
 }
 
 function goBack() {
-    window.location.href = "/dashboard.html";
+    window.location.href = "/dashboard/";
 }
 </script>
-
 
 </body>
 </html>

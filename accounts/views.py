@@ -7,13 +7,14 @@ from django.views.decorators.csrf import ensure_csrf_cookie
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
+from rest_framework.authtoken.models import Token
 
 import random
 from django.core.mail import send_mail
 from .models import EmailOTP
 
 
-# ---------------- API VIEWS ----------------
+# ---------------- REGISTER ----------------
 
 class RegisterAPI(APIView):
     permission_classes = [AllowAny]
@@ -26,8 +27,11 @@ class RegisterAPI(APIView):
         if not all([username, email, password]):
             return Response({"success": False, "message": "All fields required"}, status=400)
 
+        if User.objects.filter(username=username).exists():
+            return Response({"success": False, "message": "Username exists"}, status=400)
+
         if User.objects.filter(email=email).exists():
-            return Response({"success": False, "message": "Email already exists"}, status=400)
+            return Response({"success": False, "message": "Email exists"}, status=400)
 
         user = User.objects.create_user(
             username=username,
@@ -39,21 +43,18 @@ class RegisterAPI(APIView):
         otp = str(random.randint(100000, 999999))
         EmailOTP.objects.update_or_create(user=user, defaults={"otp": otp})
 
-        try:
-         send_mail(
-                subject="Verify your account",
-                message=f"Your verification code is {otp}",
-                from_email=None,
-                recipient_list=[email],
-                fail_silently=True,  # 🔥 IMPORTANT
-            )
-        except Exception as e:
-            print("Email error:", e)
-        except Exception as e:
-            print("Email error:", e)
+        send_mail(
+            subject="Verify your FitDesk account",
+            message=f"Your OTP is {otp}",
+            from_email=None,
+            recipient_list=[email],
+            fail_silently=False
+        )
 
         return Response({"success": True})
 
+
+# ---------------- VERIFY OTP ----------------
 
 class VerifyOTPAPI(APIView):
     permission_classes = [AllowAny]
@@ -69,7 +70,7 @@ class VerifyOTPAPI(APIView):
             return Response({"success": False}, status=400)
 
         if record.otp != otp:
-            return Response({"success": False, "message": "Invalid OTP"}, status=400)
+            return Response({"success": False}, status=400)
 
         user.is_active = True
         user.save()
@@ -77,6 +78,8 @@ class VerifyOTPAPI(APIView):
 
         return Response({"success": True})
 
+
+# ---------------- LOGIN (🔥 FIXED) ----------------
 
 class LoginAPI(APIView):
     permission_classes = [AllowAny]
@@ -87,12 +90,27 @@ class LoginAPI(APIView):
 
         user = authenticate(username=username, password=password)
 
-        if user is None:
-            return Response({"success": False, "message": "Invalid credentials"}, status=401)
+        if not user:
+            return Response(
+                {"success": False, "message": "Invalid credentials"},
+                status=401
+            )
 
-        login(request, user)
-        return Response({"success": True})
+        if not user.is_active:
+            return Response(
+                {"success": False, "message": "Verify email first"},
+                status=403
+            )
 
+        token, _ = Token.objects.get_or_create(user=user)
+
+        return Response({
+            "success": True,
+            "token": token.key   # 🔥 THIS WAS MISSING / BROKEN
+        })
+
+
+# ---------------- FORGOT PASSWORD ----------------
 
 class ForgotPasswordAPI(APIView):
     permission_classes = [AllowAny]
@@ -128,43 +146,31 @@ class ResetPasswordAPI(APIView):
         return Response({"success": True})
 
 
-# ---------------- PAGE VIEWS ----------------
+# ---------------- PAGES ----------------
 
 @ensure_csrf_cookie
 def login_page(request):
     return render(request, "login.html")
 
-
 def register_page(request):
     return render(request, "register.html")
-
 
 def verify_otp_page(request):
     return render(request, "verify_otp.html")
 
-
 def forgot_password_page(request):
     return render(request, "forgot_password.html")
 
-
 def reset_password_page(request):
     return render(request, "reset_password.html")
-
 
 @login_required(login_url="/api/accounts/login-page/")
 def dashboard_page(request):
     return render(request, "dashboard.html")
 
-
 @login_required(login_url="/api/accounts/login-page/")
 def profile_page(request):
     return render(request, "profile.html")
-
-
-@login_required(login_url="/api/accounts/login-page/")
-def add_expense_page(request):
-    return render(request, "add_expense.html")
-
 
 def logout_view(request):
     logout(request)

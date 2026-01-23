@@ -179,15 +179,13 @@
 <div class="month-grid" id="monthlyExpenses"></div>
 
 <script>
-/* 🔒 SESSION AUTH CHECK */
-fetch("https://fitdesk.onrender.com/api/accounts/login/", {
-    credentials: "include"
-})
-.then(res => {
-    if (res.status === 401) {
-        window.location.href = "/login.html";
-    }
-});
+/* 🔒 AUTH CHECK */
+const token = localStorage.getItem("token");
+if (!token) {
+    window.location.href = "/api/accounts/login-page/";
+}
+
+
 
 /* 👤 PROFILE DROPDOWN */
 function toggleProfile() {
@@ -198,42 +196,32 @@ function toggleProfile() {
 /* ✅ CLOSE DROPDOWN ON OUTSIDE CLICK */
 document.addEventListener("click", e => {
     if (!e.target.closest(".profile")) {
-        const menu = document.getElementById("profileMenu");
-        if (menu) menu.style.display = "none";
+        document.getElementById("profileMenu").style.display = "none";
     }
 });
 
 function goProfile() {
-    window.location.href = "/profile.html";
+    window.location.href = "/api/accounts/profile/";
 }
 
 function logout() {
-    fetch("https://fitdesk.onrender.com/api/accounts/logout/", {
-        credentials: "include"
-    }).finally(() => {
-        window.location.href = "/login.html";
-    });
+    localStorage.clear();
+    window.location.href = "/api/accounts/login-page/";
 }
 
 /* 📊 DASHBOARD SUMMARY */
-fetch("https://fitdesk.onrender.com/api/gym/dashboard-data/", {
-    credentials: "include"
+fetch("/api/gym/dashboard-data/", {
+    headers: { Authorization: "Token " + localStorage.getItem("token") }
 })
-.then(res => {
-    if (!res.ok) throw new Error("Auth failed");
-    return res.json();
-})
+.then(res => res.json())
 .then(data => {
-    document.getElementById("active").innerText = data.active_members ?? 0;
-    document.getElementById("expired").innerText = data.expired_members ?? 0;
-})
-.catch(() => {
-    window.location.href = "/login.html";
+    document.getElementById("active").innerText = data.active_members;
+    document.getElementById("expired").innerText = data.expired_members;
 });
 
 /* 📈 CURRENT MONTH */
-fetch("https://fitdesk.onrender.com/api/gym/current-month-summary/", {
-    credentials: "include"
+fetch("/api/gym/current-month-summary/", {
+    headers: { Authorization: "Token " + localStorage.getItem("token") }
 })
 .then(res => res.json())
 .then(data => {
@@ -257,9 +245,9 @@ fetch("https://fitdesk.onrender.com/api/gym/current-month-summary/", {
     });
 });
 
-/* 📆 MONTHLY ANALYTICS */
-fetch("https://fitdesk.onrender.com/api/expenses/monthly-summary/", {
-    credentials: "include"
+/* 📆 MONTHLY ANALYTICS (FIXED) */
+fetch("/api/expenses/monthly-summary/", {
+    headers: { Authorization: "Token " + localStorage.getItem("token") }
 })
 .then(res => res.json())
 .then(data => {
@@ -277,15 +265,14 @@ fetch("https://fitdesk.onrender.com/api/expenses/monthly-summary/", {
                 <h4>${m.month} ${m.year}</h4>
                 <p>Earnings: ₹${m.earning}</p>
                 <p>Expenses: ₹${m.expense}</p>
-                <p style="color:${m.profit >= 0 ? '#00ff88' : '#ff4444'}">
-                    ${m.profit >= 0 ? 'Profit' : 'Loss'}: ₹${Math.abs(m.profit)}
+                <p style="color:${m.profit>=0?'#00ff88':'#ff4444'}">
+                    ${m.profit>=0?'Profit':'Loss'}: ₹${Math.abs(m.profit)}
                 </p>
             </div>
         `;
     });
 });
 </script>
-
 
 </body>
 </html>

@@ -121,41 +121,34 @@
 </div>
 
 <script>
-// ❌ REMOVE TOKEN CHECK (SESSION AUTH IS USED NOW)
-// Backend will handle auth via session
+if (!localStorage.getItem("token")) {
+    window.location.href = "/api/accounts/login-page/";
+}
 
 function addExpense() {
-    fetch("https://fitdesk.onrender.com/api/expenses/add/", {
+    fetch("/api/expenses/add/", {
         method: "POST",
         headers: {
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "Authorization": "Token " + localStorage.getItem("token")
         },
-        credentials: "include",   // ✅ VERY IMPORTANT
         body: JSON.stringify({
             title: title.value,
             amount: amount.value,
             date: date.value
         })
     })
-    .then(res => {
-        if (!res.ok) {
-            alert("You are not logged in");
-            window.location.href = "/login.html"; // frontend login page
-            return;
-        }
-        return res.json();
-    })
+    .then(res => res.json())
     .then(() => {
         alert("Expense added successfully");
-        window.location.href = "/dashboard.html";
+        window.location.href = "/dashboard/";
     });
 }
 
 function goBack() {
-    window.location.href = "/dashboard.html";
+    window.location.href = "/dashboard/";
 }
 </script>
-
 
 </body>
 </html>
