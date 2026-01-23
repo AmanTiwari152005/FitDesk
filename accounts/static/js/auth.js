@@ -46,20 +46,26 @@ function register() {
     const password = document.getElementById("reg-password").value.trim();
 
     fetch("/api/accounts/register/", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, email, password })
-    })
-    .then(res => res.json())
-    .then(data => {
-        if (!data.success) {
-            alert(data.message || "Registration failed");
-            return;
-        }
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ username, email, password })
+})
+.then(async (res) => {
+  const text = await res.text();
+  try {
+    const data = JSON.parse(text);
+    if (!data.success) {
+      alert(data.message || "Registration failed");
+      return;
+    }
+    localStorage.setItem("otp_email", email);
+    window.location.href = "/api/accounts/verify-otp-page/";
+  } catch (e) {
+    console.log("Server returned non-JSON:", text);
+    alert("Server error. Check backend logs.");
+  }
+});
 
-        localStorage.setItem("otp_email", email);
-        window.location.href = "/api/accounts/verify-otp-page/";
-    });
 }
 
 // ================= VERIFY OTP =================
