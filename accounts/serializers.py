@@ -1,39 +1,31 @@
 from django.contrib.auth.models import User
+from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
-from django.contrib.auth import authenticate
 
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
 
     class Meta:
         model = User
-        fields = ['username', 'email', 'password']
+        fields = ['email', 'password']
 
-    def validate_username(self, value):
-        if User.objects.filter(username=value).exists():
-            raise serializers.ValidationError("Username already exists")
+    def validate_email(self, value):
+        email = value.strip().lower()
+        if len(email) > User._meta.get_field("username").max_length:
+            raise serializers.ValidationError("Email address is too long.")
+        if User.objects.filter(email__iexact=email).exists():
+            raise serializers.ValidationError("An account with this email already exists.")
+        return email
+
+    def validate_password(self, value):
+        validate_password(value)
         return value
 
     def create(self, validated_data):
+        email = validated_data['email']
         user = User.objects.create_user(
-            username=validated_data['username'],
-            email=validated_data['email'],
+            username=email,
+            email=email,
             password=validated_data['password']
         )
         return user
-
-
-class LoginSerializer(serializers.Serializer):
-    username = serializers.CharField()
-    password = serializers.CharField(write_only=True)
-
-    def validate(self, data):
-        user = authenticate(
-            username=data['username'],
-            password=data['password']
-        )
-        if not user:
-            raise serializers.ValidationError("Invalid credentials")
-        return user
-
-

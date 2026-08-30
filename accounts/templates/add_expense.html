@@ -2,6 +2,7 @@
 <html>
 <head>
     <title>Add Expense</title>
+    {% load static %}
 
    <style>
     * {
@@ -100,6 +101,7 @@
         border-color: #ffdb05;
     }
 </style>
+<link rel="stylesheet" href="{% static 'css/theme.css' %}">
 </head>
 
 <body>
@@ -130,7 +132,7 @@ function addExpense() {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
-            "Authorization": "Token " + localStorage.getItem("token")
+            "Authorization": "Bearer " + localStorage.getItem("token")
         },
         body: JSON.stringify({
             title: title.value,

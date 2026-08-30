@@ -29,6 +29,7 @@
             text-align: center;
         }
     </style>
+    <link rel="stylesheet" href="{% static 'css/theme.css' %}">
 </head>
 <body>
 
@@ -43,18 +44,12 @@
         <h3>Create Account</h3>
 
         <!-- INPUTS -->
-        <input type="text" id="reg-username" placeholder="Username">
         <input type="email" id="reg-email" placeholder="Email">
         <input type="password" id="reg-password" placeholder="Password">
 
         <!-- REGISTER BUTTON -->
        <button type="button" onclick="register()">Register</button>
 
-
-        <!-- INFO -->
-        <div class="info-text">
-            📩 A verification code will be sent to your email
-        </div>
 
         <!-- MESSAGE AREA -->
         <div id="message"></div>

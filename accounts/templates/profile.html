@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Gym Profile</title>
+    {% load static %}
 
 <style>
     * {
@@ -117,6 +118,7 @@
         border-color: #ffdb05;
     }
 </style>
+<link rel="stylesheet" href="{% static 'css/theme.css' %}">
 </head>
 
 <body>
@@ -149,6 +151,19 @@
     <input type="number" id="yearly_fee">
 
     <button class="btn save" onclick="saveProfile()">Save Changes</button>
+
+    <h2 style="margin-top: 34px;">Password</h2>
+
+    <label>Current Password</label>
+    <input type="password" id="current-password" placeholder="Enter current password">
+
+    <label>New Password</label>
+    <input type="password" id="new-password" placeholder="Enter new password">
+
+    <label>Confirm New Password</label>
+    <input type="password" id="confirm-password" placeholder="Confirm new password">
+
+    <button class="btn save" onclick="changeProfilePassword()">Change Password</button>
     <button class="btn back" onclick="goBack()">Back to Dashboard</button>
 </div>
 
@@ -161,7 +176,7 @@ if (!localStorage.getItem("token")) {
 /* LOAD PROFILE DATA */
 fetch("/api/gym/profile/", {
     headers: {
-        "Authorization": "Token " + localStorage.getItem("token")
+        "Authorization": "Bearer " + localStorage.getItem("token")
     }
 })
 .then(res => res.json())
@@ -182,7 +197,7 @@ function saveProfile() {
         method: "PUT",
         headers: {
             "Content-Type": "application/json",
-            "Authorization": "Token " + localStorage.getItem("token")
+            "Authorization": "Bearer " + localStorage.getItem("token")
         },
         body: JSON.stringify({
             gym_name: gym_name.value,
@@ -202,6 +217,46 @@ function saveProfile() {
 
 function goBack() {
     window.location.href = "/dashboard/";
+}
+
+function changeProfilePassword() {
+    const currentPassword = document.getElementById("current-password").value.trim();
+    const password = document.getElementById("new-password").value.trim();
+    const confirm = document.getElementById("confirm-password").value.trim();
+
+    if (!currentPassword || !password || !confirm) {
+        alert("Please fill all password fields");
+        return;
+    }
+
+    if (password !== confirm) {
+        alert("Passwords do not match");
+        return;
+    }
+
+    fetch("/api/accounts/reset-password/", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + localStorage.getItem("token")
+        },
+        body: JSON.stringify({
+            current_password: currentPassword,
+            password
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (!data.success) {
+            alert(data.message || "Password change failed");
+            return;
+        }
+
+        alert("Password changed successfully. Please login again.");
+        localStorage.clear();
+        window.location.href = "/api/accounts/login-page/";
+    })
+    .catch(() => alert("Password change error"));
 }
 </script>
 
