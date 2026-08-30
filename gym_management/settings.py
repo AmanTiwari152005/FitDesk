@@ -1,25 +1,43 @@
 """
 Django settings for gym_management project.
-Firebase-based authentication (NO allauth, NO dj-rest-auth)
+Email/password authentication with JWT bearer tokens.
 """
 
 from pathlib import Path
 import os
 
-
-
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+
+def env_bool(name, default=False):
+    value = os.environ.get(name)
+    if value is None:
+        return default
+    return value.lower() in {"1", "true", "yes", "on"}
+
+
+def env_list(name, default):
+    value = os.environ.get(name)
+    if not value:
+        return default
+    return [item.strip() for item in value.split(",") if item.strip()]
 
 # --------------------------------------------------
 # BASIC CONFIG
 # --------------------------------------------------
 
-SECRET_KEY = "django-insecure-b1jn*$#8zzyz*ef42&%%*6sz_jgo(e@^89n8-=-xko=5u@ztc3"
+SECRET_KEY = os.environ.get(
+    "SECRET_KEY",
+    "django-insecure-local-dev-only-change-me",
+)
 
 
-DEBUG = True
+DEBUG = env_bool("DEBUG", True)
 
-ALLOWED_HOSTS = ["*"]
+if not DEBUG and SECRET_KEY == "django-insecure-local-dev-only-change-me":
+    raise RuntimeError("SECRET_KEY must be set when DEBUG is false.")
+
+ALLOWED_HOSTS = env_list("ALLOWED_HOSTS", ["localhost", "127.0.0.1"])
 
 
 # --------------------------------------------------
@@ -36,8 +54,8 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
 
     # DRF
+    "corsheaders",
     "rest_framework",
-    "rest_framework.authtoken",
 
     # Your apps
     "accounts",
@@ -53,7 +71,6 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
-    "whitenoise.middleware.WhiteNoiseMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -92,36 +109,12 @@ WSGI_APPLICATION = "gym_management.wsgi.application"
 # DATABASE
 # --------------------------------------------------
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': 'gym_db',
-#         'USER': 'gym_user',
-#         'PASSWORD': 'gym123',
-#         'HOST': 'dpg-d5g7ufu3jp1c73bsbd00-a.oregon-postgres.render.com',
-#         'PORT': '5432',
-#     }
-# }
-
-import os
-
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": os.getenv("DB_NAME"),
-        "USER": os.getenv("DB_USER"),
-        "PASSWORD": os.getenv("DB_PASSWORD"),
-        "HOST": os.getenv("DB_HOST"),
-        "PORT": os.getenv("DB_PORT", "5432"),
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "db.sqlite3",
     }
 }
-
-
-
-
-
-
-
 
 
 
@@ -149,6 +142,7 @@ LANGUAGE_CODE = "en-us"
 TIME_ZONE = "UTC"
 USE_I18N = True
 USE_TZ = True
+DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
 
 # --------------------------------------------------
 # STATIC FILES
@@ -156,17 +150,16 @@ USE_TZ = True
 
 STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
-STATIC_ROOT = BASE_DIR / "staticfiles"
 
 
 
 # --------------------------------------------------
-# REST FRAMEWORK (TOKEN AUTH)
+# REST FRAMEWORK (JWT AUTH)
 # --------------------------------------------------
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
-        "rest_framework.authentication.TokenAuthentication",
+        "accounts.authentication.JWTAuthentication",
     ],
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticated",
@@ -181,23 +174,11 @@ AUTHENTICATION_BACKENDS = [
     "django.contrib.auth.backends.ModelBackend",
 ]
 
-# ---------------- EMAIL CONFIG (GMAIL SMTP) ----------------
-
-EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-
-EMAIL_HOST = "smtp.gmail.com"
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-
-EMAIL_HOST_USER = "atiwary489@gmail.com"
-EMAIL_HOST_PASSWORD = "gclujiyajdmzhtry"
-
-DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
-
-
 LOGIN_URL = "/api/accounts/login-page/"
 LOGIN_REDIRECT_URL = "/dashboard/"
 LOGOUT_REDIRECT_URL = "/api/accounts/login-page/"
+
+JWT_ACCESS_TOKEN_LIFETIME_SECONDS = 60 * 60 * 24
 
 
 CSRF_COOKIE_SECURE = True
@@ -217,15 +198,6 @@ SESSION_COOKIE_SECURE = True
 # LOGOUT_REDIRECT_URL = "/api/accounts/login-page/"
 
 # --------------------------------------------------
-# IMPORTANT NOTES
-# --------------------------------------------------
-# ✔ django-allauth REMOVED
-# ✔ dj-rest-auth REMOVED
-# ✔ Firebase handles Google auth
-# ✔ Django only verifies Firebase token
-
-
-
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
@@ -236,21 +208,13 @@ LOGGING = {
     },
     "root": {
         "handlers": ["console"],
-        "level": "DEBUG",
+        "level": "INFO",
     },
     "loggers": {
         "django": {
             "handlers": ["console"],
-            "level": "DEBUG",
-            "propagate": True,
+            "level": "INFO",
+            "propagate": False,
         },
     },
 }
-
-CSRF_TRUSTED_ORIGINS = ["https://fitdesk.onrender.com"]
-SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
-CORS_ALLOW_ALL_ORIGINS = True
-SECURE_SSL_REDIRECT = True
-
-
-

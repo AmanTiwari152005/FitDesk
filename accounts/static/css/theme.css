@@ -1,0 +1,249 @@
+:root {
+    --bg: #101312;
+    --bg-soft: #171c19;
+    --surface: #1b211e;
+    --surface-raised: #222923;
+    --surface-muted: #151917;
+    --border: #334039;
+    --border-soft: #27312c;
+    --text: #eef3ee;
+    --muted: #aab6ad;
+    --faint: #748079;
+    --accent: #d7a75d;
+    --accent-soft: #efd29a;
+    --accent-cool: #7bb7a3;
+    --danger: #e27d7d;
+    --success: #76c69f;
+    --shadow: 0 18px 45px rgba(0, 0, 0, 0.28);
+    --focus: 0 0 0 3px rgba(123, 183, 163, 0.18);
+}
+
+* {
+    letter-spacing: 0;
+}
+
+html {
+    background: var(--bg);
+}
+
+body {
+    background:
+        linear-gradient(135deg, rgba(16, 19, 18, 0.98), rgba(25, 32, 29, 0.98)),
+        linear-gradient(90deg, rgba(215, 167, 93, 0.07), rgba(123, 183, 163, 0.07));
+    color: var(--text);
+}
+
+.container,
+.card,
+.form-box,
+.box,
+.profile-box,
+.member-card,
+.chart,
+.month-card,
+.modal-box,
+.dropdown,
+.info,
+table {
+    background: var(--surface);
+    border: 1px solid var(--border-soft);
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+}
+
+.card,
+.form-box,
+.box,
+.profile-box,
+.modal-box {
+    background: linear-gradient(180deg, var(--surface-raised), var(--surface));
+}
+
+h1,
+h2,
+h3,
+h4,
+.header h1,
+.gym-name,
+.page-title,
+.modal-box h3 {
+    color: var(--text);
+    background: none;
+    -webkit-text-fill-color: currentColor;
+}
+
+.subtitle,
+.page-desc,
+.detail,
+.link,
+.info,
+.dropdown div {
+    color: var(--muted);
+}
+
+label,
+.card label,
+.info strong,
+th,
+.package,
+.profile {
+    color: var(--accent-soft);
+}
+
+input,
+select,
+textarea,
+.card input,
+.card textarea,
+.modal-box input,
+.modal-box select {
+    background: var(--surface-muted);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+}
+
+input::placeholder,
+textarea::placeholder {
+    color: var(--faint);
+}
+
+input:focus,
+select:focus,
+textarea:focus,
+.card input:focus,
+.card textarea:focus,
+.modal-box input:focus,
+.modal-box select:focus {
+    border-color: var(--accent-cool);
+    box-shadow: var(--focus);
+    outline: none;
+}
+
+button,
+.card button,
+.header button,
+.actions button,
+.renew-btn,
+.save-btn {
+    background: linear-gradient(135deg, var(--accent), var(--accent-cool));
+    color: #111512;
+    border: 0;
+    border-radius: 8px;
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.2);
+    transition: transform 160ms ease, box-shadow 160ms ease, filter 160ms ease;
+}
+
+button:hover,
+.card button:hover,
+.header button:hover,
+.actions button:hover,
+.renew-btn:hover,
+.save-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 14px 30px rgba(0, 0, 0, 0.26);
+    filter: brightness(1.04);
+}
+
+.secondary,
+.back,
+.history-btn,
+.modal-box button:not(.save-btn) {
+    background: var(--surface-muted);
+    color: var(--muted);
+    border: 1px solid var(--border);
+    box-shadow: none;
+}
+
+.secondary:hover,
+.back:hover,
+.history-btn:hover,
+.modal-box button:not(.save-btn):hover {
+    background: var(--surface-raised);
+    color: var(--text);
+    border-color: var(--accent-cool);
+    box-shadow: none;
+}
+
+.link a {
+    color: var(--accent-soft);
+}
+
+.image-section {
+    background: var(--surface-muted);
+}
+
+.image-section img {
+    filter: saturate(0.82) contrast(0.92) brightness(0.86);
+}
+
+.status {
+    border-radius: 999px;
+}
+
+.active,
+.profit {
+    color: var(--success);
+}
+
+.expired,
+.loss,
+.delete-btn {
+    color: var(--danger);
+}
+
+.delete-btn {
+    background: rgba(226, 125, 125, 0.1);
+    border: 1px solid rgba(226, 125, 125, 0.22);
+}
+
+.expiring {
+    color: var(--accent-soft);
+}
+
+.filter-btn {
+    border-radius: 999px;
+    background: var(--surface-muted);
+    border-color: var(--border);
+    color: var(--muted);
+}
+
+.filter-btn.active {
+    background: rgba(123, 183, 163, 0.16);
+    color: var(--text);
+    border-color: var(--accent-cool);
+}
+
+th {
+    background: var(--surface-muted);
+}
+
+tr:hover td {
+    background: rgba(123, 183, 163, 0.06);
+}
+
+.month-card {
+    border-left-color: var(--accent-cool);
+}
+
+@media (max-width: 760px) {
+    body {
+        padding: 18px;
+    }
+
+    .container {
+        width: 100%;
+        height: auto;
+        min-height: auto;
+        flex-direction: column;
+    }
+
+    .card,
+    .image-section {
+        width: 100%;
+    }
+
+    .image-section {
+        min-height: 220px;
+    }
+}

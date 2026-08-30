@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Add Member</title>
+    {% load static %}
 
   <style>
     /* RESET */
@@ -176,6 +177,7 @@
         .gym-name { color: black; -webkit-text-fill-color: black; }
     }
 </style>
+<link rel="stylesheet" href="{% static 'css/theme.css' %}">
 </head>
 <body>
 
@@ -225,22 +227,6 @@ if (!localStorage.getItem("token")) {
     window.location.href = "/api/accounts/login-page/";
 }
 
-/* FETCH REAL GYM NAME */
-fetch("/api/gym/dashboard-data/", {
-    headers: {
-        "Authorization": "Token " + localStorage.getItem("token")
-    }
-})
-.then(res => res.json())
-.then(data => {
-    document.getElementById("gymName").innerText = data.gym_name;
-    document.getElementById("memberName").innerText = data.member_name;
-    document.getElementById("package").innerText = data.package;
-    document.getElementById("joinDate").innerText = data.join_date;
-    document.getElementById("expiryDate").innerText = data.expiry_date;
-
-});
-
 /* SAVE MEMBER */
 function saveMember() {
 
@@ -253,14 +239,11 @@ function saveMember() {
         expiry_date: document.getElementById("expiry_date").value
     };
 
-    // 🔍 DEBUG (keep for now)
-    console.log("📤 Sending payload:", payload);
-
     fetch("/api/members/add/", {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
-            "Authorization": "Token " + localStorage.getItem("token")
+            "Authorization": "Bearer " + localStorage.getItem("token")
         },
         body: JSON.stringify(payload)
     })

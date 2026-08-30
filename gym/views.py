@@ -2,15 +2,12 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import render
-from .models import Gym   
-from django.db.models import Sum       # ✅ CORRECT
+from .models import Gym
+from django.db.models import Sum
 from .serializers import GymSerializer
 from members.models import Member
 from expenses.models import Expense
-from django.utils.timezone import now
 from datetime import date
-from django.utils.decorators import method_decorator
-from django.views.decorators.csrf import csrf_exempt
 
 
 
@@ -22,7 +19,6 @@ def gym_setup_page(request):
 
 # ---------- API VIEW ----------
 
-@method_decorator(csrf_exempt, name="dispatch")
 class GymCreateAPI(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -61,12 +57,9 @@ class DashboardSummaryAPI(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        print("👤 USER:", request.user)
-
         gym = Gym.objects.filter(owner=request.user).first()
 
         if not gym:
-            print("❌ NO GYM FOUND")
             return Response({
                 "active_members": 0,
                 "expired_members": 0,
@@ -75,10 +68,7 @@ class DashboardSummaryAPI(APIView):
                 "profit": 0
             })
 
-        print("🏋️ GYM:", gym)
-
         members = Member.objects.filter(gym=gym)
-        print("👥 TOTAL MEMBERS:", members.count())
 
         today = date.today()
 
@@ -97,8 +87,6 @@ class DashboardSummaryAPI(APIView):
         expense = Expense.objects.filter(gym=gym).aggregate(
             total=Sum("amount")
         )["total"] or 0
-
-        print("✅ ACTIVE:", active, "EXPIRED:", expired)
 
         return Response({
             "active_members": active,

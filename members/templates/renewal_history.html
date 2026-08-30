@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Renewal History</title>
+    {% load static %}
 
 <style>
     * {
@@ -138,6 +139,7 @@
         filter: brightness(1.1);
     }
 </style>
+<link rel="stylesheet" href="{% static 'css/theme.css' %}">
 </head>
 <body>
 
@@ -158,7 +160,7 @@ const memberId = new URLSearchParams(window.location.search).get("id");
 
 fetch(`/api/members/renewal-history/${memberId}/`, {
     headers: {
-        "Authorization": "Token " + localStorage.getItem("token")
+        "Authorization": "Bearer " + localStorage.getItem("token")
     }
 })
 .then(res => res.json())

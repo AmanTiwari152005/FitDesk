@@ -2,7 +2,6 @@ from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
-from django.db.models.functions import TruncMonth
 from django.db.models.functions import ExtractMonth, ExtractYear
 from .models import Expense
 from members.models import Member
@@ -38,7 +37,10 @@ class ListExpenseAPI(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        gym = Gym.objects.get(owner=request.user)
+        gym = Gym.objects.filter(owner=request.user).first()
+        if not gym:
+            return Response({"expenses": []})
+
         expenses = Expense.objects.filter(gym=gym)
         serializer = ExpenseSerializer(expenses, many=True)
 
@@ -100,10 +102,18 @@ class MonthDetailAPI(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        month = int(request.GET.get("month"))
-        year = int(request.GET.get("year"))
+        try:
+            month = int(request.GET.get("month", ""))
+            year = int(request.GET.get("year", ""))
+        except ValueError:
+            return Response({"error": "Valid month and year are required."}, status=400)
 
-        gym = Gym.objects.get(owner=request.user)
+        if month < 1 or month > 12:
+            return Response({"error": "Month must be between 1 and 12."}, status=400)
+
+        gym = Gym.objects.filter(owner=request.user).first()
+        if not gym:
+            return Response({"error": "Gym not found"}, status=404)
 
         expenses = Expense.objects.filter(
             gym=gym,

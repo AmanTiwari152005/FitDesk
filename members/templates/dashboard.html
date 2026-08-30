@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Dashboard</title>
+    {% load static %}
 
     <!-- ✅ CHART JS -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -142,6 +143,7 @@
         padding: 30px;
     }
 </style>
+<link rel="stylesheet" href="{% static 'css/theme.css' %}">
 </head>
 
 <body>
@@ -211,7 +213,7 @@ function logout() {
 
 /* 📊 DASHBOARD SUMMARY */
 fetch("/api/gym/dashboard-data/", {
-    headers: { Authorization: "Token " + localStorage.getItem("token") }
+    headers: { Authorization: "Bearer " + localStorage.getItem("token") }
 })
 .then(res => res.json())
 .then(data => {
@@ -221,7 +223,7 @@ fetch("/api/gym/dashboard-data/", {
 
 /* 📈 CURRENT MONTH */
 fetch("/api/gym/current-month-summary/", {
-    headers: { Authorization: "Token " + localStorage.getItem("token") }
+    headers: { Authorization: "Bearer " + localStorage.getItem("token") }
 })
 .then(res => res.json())
 .then(data => {
@@ -247,7 +249,7 @@ fetch("/api/gym/current-month-summary/", {
 
 /* 📆 MONTHLY ANALYTICS (FIXED) */
 fetch("/api/expenses/monthly-summary/", {
-    headers: { Authorization: "Token " + localStorage.getItem("token") }
+    headers: { Authorization: "Bearer " + localStorage.getItem("token") }
 })
 .then(res => res.json())
 .then(data => {

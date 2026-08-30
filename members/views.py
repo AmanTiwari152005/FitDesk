@@ -3,6 +3,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 from rest_framework.parsers import JSONParser
+from django.core.exceptions import ValidationError
 from datetime import timedelta, date
 
 from .models import Member, MemberRenewal
@@ -46,14 +47,14 @@ class AddMemberAPI(APIView):
         )
 
         return Response({
-    "success": True,
-    "message": "Member added successfully",
-    "gym_name": gym.name,
-    "member_name": member.name,
-    "package": member.package,
-    "join_date": member.join_date,
-    "expiry_date": member.expiry_date
-}, status=status.HTTP_201_CREATED)
+            "success": True,
+            "message": "Member added successfully",
+            "gym_name": gym.gym_name,
+            "member_name": member.name,
+            "package": member.package,
+            "join_date": member.join_date,
+            "expiry_date": member.expiry_date,
+        }, status=status.HTTP_201_CREATED)
 
 
 
@@ -79,7 +80,7 @@ class DeleteMemberAPI(APIView):
         try:
             gym = Gym.objects.get(owner=request.user)
             member = Member.objects.get(id=member_id, gym=gym)
-        except:
+        except (Gym.DoesNotExist, Member.DoesNotExist):
             return Response({"error": "Member not found"}, status=404)
 
         member.delete()
@@ -91,10 +92,10 @@ class RenewMemberAPI(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, member_id):
-        print("🔥 RENEW API HIT 🔥")
-        print("DATA:", request.data)
-
         gym = Gym.objects.filter(owner=request.user).first()
+        if not gym:
+            return Response({"error": "Gym not found"}, status=404)
+
         member = Member.objects.filter(id=member_id, gym=gym).first()
 
         if not member:
@@ -107,9 +108,17 @@ class RenewMemberAPI(APIView):
         if not all([package, join_date, expiry_date]):
             return Response({"error": "Missing fields"}, status=400)
 
+        valid_packages = {choice[0] for choice in Member.PACKAGE_CHOICES}
+        if package not in valid_packages:
+            return Response({"error": "Invalid package"}, status=400)
+
         member.package = package
         member.join_date = join_date
         member.expiry_date = expiry_date
+        try:
+            member.full_clean()
+        except ValidationError as error:
+            return Response({"error": error.message_dict}, status=400)
         member.save()
 
         # fee
@@ -121,8 +130,6 @@ class RenewMemberAPI(APIView):
         elif package == "Yearly":
             amount = gym.yearly_fee
 
-        from members.models import MemberRenewal
-
         MemberRenewal.objects.create(
             gym=gym,
             member=member,
@@ -131,8 +138,6 @@ class RenewMemberAPI(APIView):
             end_date=expiry_date,
             amount=amount
         )
-
-        print("✅ RENEWAL SAVED")
 
         return Response({"success": True})
 
@@ -172,7 +177,7 @@ class MemberRenewalHistoryAPI(APIView):
         try:
             gym = Gym.objects.get(owner=request.user)
             member = Member.objects.get(id=member_id, gym=gym)
-        except:
+        except (Gym.DoesNotExist, Member.DoesNotExist):
             return Response({"error": "Member not found"}, status=404)
 
         renewals = member.renewals.order_by("-renewed_on")
@@ -191,5 +196,3 @@ class MemberRenewalHistoryAPI(APIView):
             "member_name": member.name,
             "history": data
         })
-
-

@@ -1,8 +1,46 @@
-env/
-venv/
+# Python bytecode and caches
 __pycache__/
-*.pyc
-db.sqlite3
-staticfiles/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Local environment and secrets
 .env
+.env.*
+!.env.example
+
+# Django local/runtime files
+db.sqlite3
+*.sqlite3
+media/
+staticfiles/
+
+# Logs and process files
+*.log
+*.pid
+
+# OS and editor files
 .DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Keep source static assets, templates, migrations, and requirements tracked.
+# Do not ignore:
+# - accounts/static/
+# - accounts/templates/
+# - members/templates/
+# - gym/templates/
+# - */migrations/
+# - requirements.txt
+# - Procfile

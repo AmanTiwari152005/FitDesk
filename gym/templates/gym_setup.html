@@ -2,6 +2,7 @@
 <html>
 <head>
     <title>Gym Setup</title>
+{% load static %}
 <style>
     body {
         font-family: 'Segoe UI', Arial, sans-serif;
@@ -87,6 +88,7 @@
         filter: brightness(1.1);
     }
 </style>
+<link rel="stylesheet" href="{% static 'css/theme.css' %}">
 </head>
 <body>
 
@@ -118,9 +120,6 @@
 </div>
 
 <script>
-/* 🔍 DEBUG CHECK */
-console.log("Gym setup JS loaded");
-
 /* 🔐 TOKEN CHECK */
 const token = localStorage.getItem("token");
 if (!token) {
@@ -130,13 +129,11 @@ if (!token) {
 
 /* 🔥 BUTTON HANDLER */
 document.getElementById("setupBtn").addEventListener("click", () => {
-    console.log("Setup button clicked");
-
     fetch("/api/gym/setup/create/", {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
-            "Authorization": "Token " + token
+            "Authorization": "Bearer " + token
         },
         body: JSON.stringify({
             gym_name: document.getElementById("gym_name").value,
@@ -149,12 +146,9 @@ document.getElementById("setupBtn").addEventListener("click", () => {
         })
     })
     .then(res => {
-        console.log("Response status:", res.status);
         return res.json();
     })
     .then(data => {
-        console.log("Response data:", data);
-
         if (data.success) {
             window.location.href = "/dashboard/";
         } else {
